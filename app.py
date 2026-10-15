@@ -1,4 +1,5 @@
 import streamlit as st
+from pawpal_system import Owner, Pet, Task, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -49,17 +50,20 @@ st.caption("Add a few tasks. In your final version, these should feed into your 
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     task_title = st.text_input("Task title", value="Morning walk")
 with col2:
-    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+    due_time = st.text_input("Due Time (HH:MM)", value="08:00")
 with col3:
+    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+with col4:
     priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
+# Fix 1: Include due_time when button is clicked
 if st.button("Add task"):
     st.session_state.tasks.append(
-        {"title": task_title, "duration_minutes": int(duration), "priority": priority}
+        {"title": task_title, "due_time": due_time, "duration_minutes": int(duration), "priority": priority}
     )
 
 if st.session_state.tasks:
@@ -73,16 +77,45 @@ st.divider()
 st.subheader("Build Schedule")
 st.caption("This button should call your scheduling logic once you implement it.")
 
-if st.button("Generate schedule"):
-    st.warning(
-        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-    )
-    st.markdown(
-        """
+#if st.button("Generate schedule"):
+#    st.warning(
+#        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
+#    )
+#    st.markdown()
+"""
 Suggested approach:
 1. Design your UML (draft).
 2. Create class stubs (no logic).
 3. Implement scheduling behavior.
 4. Connect your scheduler here and display results.
 """
-    )
+if st.button("Generate schedule"):
+    if not st.session_state.tasks:
+        st.warning("Please add at least one task first.")
+    else:
+        # 1. Build domain objects
+        owner = Owner(name=owner_name)
+        pet = Pet(name=pet_name, species=species)
+        for t in st.session_state.tasks:
+            # Default to "08:00" if no due_time was provided
+            time_val = t.get("due_time", "08:00")
+            pet.add_task(Task(description=t["title"], due_time=time_val))
+        owner.add_pet(pet)
+
+        # 2. Run scheduler logic
+        scheduler = Scheduler(owner=owner)
+
+        # 3. Check for conflicts
+        conflicts = scheduler.detect_conflicts()
+        if conflicts:
+            for a, b in conflicts:
+                st.warning(f"⚠️ Conflict at {a.due_time}: '{a.description}' overlaps with '{b.description}'")
+
+        # 4. Display sorted schedule
+        st.success(f"Generated schedule for {pet.name} ({owner.name}'s pet):")
+        sorted_tasks = scheduler.get_daily_schedule()
+        display_data = [
+            {"Time": t.due_time, "Task": t.description, "Status": "Pending"}
+            for t in sorted_tasks
+        ]
+        st.table(display_data)

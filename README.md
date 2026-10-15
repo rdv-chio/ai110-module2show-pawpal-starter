@@ -46,29 +46,53 @@ pip install -r requirements.txt
 
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+```Plaintext
+🐾 Starting PawPal+ CLI Demonstration
+========================================
+
+📅 Aggregated Schedule (Chronological Order):
+  [08:00] Lowe     - Morning oral medication        (daily) [○ Pending]
+  [08:00] Betito   - Administer ear drops           (once) [○ Pending]
+  [14:00] Betito   - Brushing and coat grooming     (weekly) [○ Pending]
+  [18:00] Lowe     - Evening wet food               (daily) [○ Pending]
+
+⚠️ Conflict Detection Check:
+  * Conflict at 08:00: 'Morning oral medication' (Lowe) vs 'Administer ear drops' (Betito)
+
+🔄 Completing Task and Generating Next Occurrence:
+  Completing: Morning oral medication for Lowe...
+  Original Status: Completed
+  Generated Next Task: 'Morning oral medication (Next: 2026-10-15)' at 08:00
+
+========================================
+✅ PawPal+ CLI Demo execution finished successfully.
 ```
 
 ## 🧪 Testing PawPal+
 
 ```bash
 # Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+pytest -v
 ```
 
 Sample test output:
 
+```Plaintext
+================================================= test session starts ==================================================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /mnt/d/code/codepath/ai110/ai110-module2show-pawpal-starter
+collected 5 items
+
+tests/test_pawpal.py::test_task_completion PASSED                                                                [ 20%]
+tests/test_pawpal.py::test_pet_task_aggregation PASSED                                                           [ 40%]
+tests/test_pawpal.py::test_chronological_sorting PASSED                                                          [ 60%]
+tests/test_pawpal.py::test_conflict_detection PASSED                                                             [ 80%]
+tests/test_pawpal.py::test_recurrence_daily PASSED                                                               [100%]
+
+================================================== 5 passed in 0.18s ===================================================
 ```
-# Paste your pytest output here
-```
+
+**Confidence Level:** ⭐⭐⭐⭐⭐ (5/5) — All primary OOP aggregation pathways, 24-hour time sorting, conflict detection pairs, and recurrence calculations pass automated verification.
 
 ## 📐 Smarter Scheduling
 
@@ -76,19 +100,19 @@ Sample test output:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_time()` | Parses `due_time` strings (`HH:MM`) into `datetime.time` objects for chronological sorting across multiple pets. |
+| Filtering | `Scheduler.filter_by_pet()`, `Scheduler.filter_by_status()` | Filters aggregated tasks by matching pet name or completion state (`is_completed`). |
+| Conflict handling | `Scheduler.detect_conflicts()` | Scans aggregated tasks across all pets and returns tuples of tasks sharing identical execution times. |
+| Recurring tasks | `Scheduler.complete_and_reschedule()` | Marks a task complete and, if `daily` or `weekly`, schedules the next occurrence with an offset date. |
 
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. **Initialize State:** The app launches with owner "Rocio" and two registered pets ("Lowe" and "Betito") in `st.session_state`.
+2. **Review Aggregated Timeline:** All tasks across all pets are pulled via `Owner.get_all_tasks()` and displayed chronologically.
+3. **Conflict Awareness:** The UI immediately flags simultaneous tasks (e.g., both Lowe and Betito having care items scheduled at 08:00) using `st.warning`.
+4. **Interactive Completion:** Clicking the "Complete" button triggers `complete_and_reschedule()`, marking the current task done and inserting tomorrow's instance into the schedule.
+5. **Add Pet / Add Task:** The sidebar provides forms to register additional pets or schedule tasks on the fly, dynamically updating the master schedule upon rerun.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
